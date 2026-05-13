@@ -6,8 +6,7 @@ from src.langgraphagenticai.graph.graph_builder import GraphBuilder
 from src.langgraphagenticai.ui.streamlitui.display_result import DisplayResultStreamlit
 
 def load_langgraph_agenticai_app():
-    """
-    Loads and runs the LangGraph AgenticAI application with Streamlit UI.
+    """ Loads and runs the LangGraph AgenticAI application with Streamlit UI.
     This function initializes the UI, handles user input, configures the LLM model,
     sets up the graph based on the selected use case, and displays the output while 
     implementing exception handling for robustness.
