@@ -21,7 +21,11 @@ def load_langgraph_agenticai_app():
         st.error("Error: Failed to load user input from the UI.")
         return
     
-    user_message = st.chat_input("Enter your message:")
+    # Text input for user message
+    if st.session_state.IsFetchButtonClicked:
+        user_message = st.session_state.timeframe 
+    else :
+        user_message = st.chat_input("Enter your message:")
 
     if user_message:
         try:
@@ -41,11 +45,8 @@ def load_langgraph_agenticai_app():
                     return
             
             ## Graph Builder
-            if usecase.strip().lower() == "chatbot with web" and not user_input.get("TAVILY_API_KEY"):
-                st.error("Error: TAVILY_API_KEY is required for the web search use case.")
-                return
 
-            graph_builder=GraphBuilder(model, tool_keys=user_input)
+            graph_builder=GraphBuilder(model)
             try:
                  graph=graph_builder.setup_graph(usecase)
                  print(user_message)
