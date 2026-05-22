@@ -1,60 +1,82 @@
 import streamlit as st
-from langchain_core.messages import HumanMessage,AIMessage,ToolMessage
-import json
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+
+from src.langgraphagenticai.ui.streamlitui.components.chat_panel import (
+    append_history,
+    render_loading_indicator,
+)
 
 
 class DisplayResultStreamlit:
-    def __init__(self,usecase,graph,user_message):
-        self.usecase= usecase
+    def __init__(self, usecase, graph, user_message):
+        self.usecase = (usecase or "").strip()
         self.graph = graph
         self.user_message = user_message
 
+    def _ensure_history(self) -> None:
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = []
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
     def display_result_on_ui(self):
-        usecase= self.usecase
+        self._ensure_history()
+        usecase = self.usecase
         graph = self.graph
         user_message = self.user_message
-        print(user_message)
-        if usecase =="Basic Chatbot":
-                for event in graph.stream({'messages':("user",user_message)}):
-                    print(event.values())
-                    for value in event.values():
-                        print(value['messages'])
-                        with st.chat_message("user"):
-                            st.write(user_message)
-                        with st.chat_message("assistant"):
-                            st.write(value["messages"].content)
 
-        elif usecase=="Chatbot With Web":
-             # Prepare state and invoke the graph
-            initial_state = {"messages": [user_message]}
-            res = graph.invoke(initial_state)
-            for message in res['messages']:
-                if type(message) == HumanMessage:
-                    with st.chat_message("user"):
-                        st.write(message.content)
-                elif type(message)==ToolMessage:
-                    with st.chat_message("ai"):
-                        st.write("Tool Call Start")
-                        st.write(message.content)
-                        st.write("Tool Call End")
-                elif type(message)==AIMessage and message.content:
-                    with st.chat_message("assistant"):
-                        st.write(message.content)
-                        
+        if usecase == "Basic Chatbot":
+            st.session_state.messages.append(HumanMessage(content=user_message))
+            append_history("user", user_message)
+
+            placeholder = st.empty()
+            with placeholder.container():
+                render_loading_indicator("Streaming response from Groq…")
+            assistant_text = ""
+            for event in graph.stream({"messages": st.session_state.messages}):
+                for value in event.values():
+                    assistant_text = getattr(
+                        value["messages"], "content", str(value["messages"])
+                    )
+            placeholder.empty()
+
+            append_history("assistant", assistant_text)
+            st.session_state.messages.append(AIMessage(content=assistant_text))
+            st.rerun()
+
+        elif usecase == "Chatbot With Web":
+            st.session_state.messages.append(HumanMessage(content=user_message))
+            append_history("user", user_message)
+
+            with st.spinner(""):
+                render_loading_indicator("Searching the web & reasoning…")
+                res = graph.invoke({"messages": st.session_state.messages})
+
+            for message in res["messages"]:
+                if isinstance(message, ToolMessage):
+                    append_history("tool", message.content)
+                elif isinstance(message, AIMessage) and message.content:
+                    append_history("assistant", message.content)
+                    st.session_state.messages.append(message)
+            st.rerun()
 
         elif usecase == "AI News":
-            frequency = self.user_message
-            with st.spinner("Fetching and summarizing news... ⏳"):
-                result = graph.invoke({"messages": frequency})
-                try:
-                    # Read the markdown file
-                    AI_NEWS_PATH = f"./AINews/{frequency.lower()}_summary.md"
-                    with open(AI_NEWS_PATH, "r") as file:
-                        markdown_content = file.read()
+            frequency = user_message
+            append_history("user", f"Generate **{frequency}** AI news digest")
 
-                    # Display the markdown content in Streamlit
-                    st.markdown(markdown_content, unsafe_allow_html=True)
-                except FileNotFoundError:
-                    st.error(f"News Not Generated or File not found: {AI_NEWS_PATH}")
-                except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
+            with st.spinner(""):
+                render_loading_indicator("Running fetch → summarize → save pipeline…")
+                graph.invoke({"messages": frequency})
+
+            try:
+                ai_news_path = f"./AINews/{frequency.lower()}_summary.md"
+                with open(ai_news_path, "r", encoding="utf-8") as file:
+                    markdown_content = file.read()
+                append_history("assistant", markdown_content)
+            except FileNotFoundError:
+                st.error(f"News not generated or file not found: {ai_news_path}")
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
+
+            st.session_state.IsFetchButtonClicked = False
+            st.rerun()
