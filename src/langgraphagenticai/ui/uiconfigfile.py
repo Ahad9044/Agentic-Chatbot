@@ -1,9 +1,12 @@
 from configparser import ConfigParser
+from pathlib import Path
 
 class Config:
-    def __init__(self, config_file=r"src\langgraphagenticai\ui\uiconfigfile.ini"):
+    def __init__(self, config_file=None):
+        if config_file is None:
+            config_file = Path(__file__).parent / "uiconfigfile.ini"
         self.config = ConfigParser()
-        self.config.read(config_file)
+        self.config.read(config_file, encoding="utf-8")
 
     def get_llm_options(self):
         return self.config["DEFAULT"].get("LLM_OPTIONS").split(", ")
