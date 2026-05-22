@@ -4,14 +4,11 @@
 
 **Stateful LangGraph agents · Groq inference · Live web search — deployed on Streamlit Cloud**
 
-[![Live on Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://agentic-chatbot.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-Stateful%20Agents-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraph/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Cloud-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io/cloud)
 [![Groq](https://img.shields.io/badge/Groq-LLM-F55036?style=for-the-badge)](https://groq.com/)
 [![Tavily](https://img.shields.io/badge/Tavily-Search-00D4AA?style=for-the-badge)](https://tavily.com/)
-
-**[🚀 Try the live app](https://agentic-chatbot.streamlit.app)** · [Features](#-features) · [Architecture](#-architecture) · [Run locally](#-run-locally) · [Deploy](#-deploy-on-streamlit-cloud)
 
 </div>
 
@@ -19,11 +16,11 @@
 
 ## Overview
 
-**Pixie** is a production-deployed demo of **agentic AI** built with [LangGraph](https://langchain-ai.github.io/langgraph/). Three use cases share one Streamlit UI: basic chat, web-grounded ReAct agents, and an automated AI news digest pipeline.
+**Pixie** is a production-deployed demo of **agentic AI** built with LangGraph. Three use cases share one Streamlit UI: basic chat, web-grounded ReAct agents, and an automated AI news digest pipeline.
 
 | | |
 |---|---|
-| **Live app** | [agentic-chatbot.streamlit.app](https://agentic-chatbot.streamlit.app) |
+| **Live app** | [pixie-the-ai.app](https://pixie-the-ai.streamlit.app/) |
 | **Repository** | [github.com/Ahad9044/Agentic-Chatbot](https://github.com/Ahad9044/Agentic-Chatbot) |
 | **Entry point** | `app.py` |
 
@@ -33,17 +30,10 @@
 
 | Mode | What it does | LangGraph pattern |
 |------|----------------|-------------------|
-| **Basic Chatbot** | Conversational Q&A with Groq | `START → chatbot → END` |
-| **Chatbot With Web** | Answers with live Tavily search | **ReAct loop** with `tools_condition` |
+| **Basic Chatbot** | Conversational Q&A with LLM | `START → chatbot → END` |
+| **Chatbot With Web** | Answers with live Web search | **ReAct loop** with `tools_condition` |
 | **AI News Explorer** | Daily / weekly / monthly AI news digest | **Pipeline**: fetch → summarize → save |
 
-### UI & UX
-
-- **Claude-style welcome** — “How can I help you?” with chat input when history is empty  
-- **Modular Streamlit UI** — theme, header, sidebar, conversation panel, scroll helpers  
-- **Single conversation thread** — outlined panel (no per-message bubbles)  
-- **Auto-scroll** — jumps to the latest assistant reply  
-- **Sidebar console** — Groq model, use case, API keys  
 
 ### Engineering highlights
 
@@ -103,15 +93,15 @@ flowchart TB
 
 | Step | Component | Role |
 |------|-----------|------|
-| 1 | Sidebar + `GroqLLM` | User picks model and supplies Groq API key |
-| 2 | `ChatGroq` | Single LangChain chat model passed into all nodes |
+| 1 | Sidebar + `LLM` | User picks model and supplies API key |
+| 2 | `Chat` | Single LangChain chat model passed into all nodes |
 | 3 | Basic chat | `llm.invoke(messages)` |
 | 4 | Web chat | `llm.bind_tools(tavily)` + ReAct routing |
 | 5 | AI News | `llm.invoke` in summarize step after Tavily fetch |
 
 ### Request flow
 
-1. User configures **Groq** (and **Tavily** if needed) in the sidebar.  
+1. User configures **LLM** (and **Tavily** if needed) in the sidebar.  
 2. `GroqLLM.get_llm_model()` returns `ChatGroq`.  
 3. `GraphBuilder.setup_graph(usecase)` compiles the LangGraph.  
 4. User message (or news timeframe) runs through the graph.  
@@ -173,7 +163,7 @@ This project is deployed on [Streamlit Community Cloud](https://streamlit.io/clo
 
 ### Live application
 
-**URL:** [https://agentic-chatbot.streamlit.app](https://agentic-chatbot.streamlit.app)
+**URL:** [https://pixie-the-ai.com](https://pixie-the-ai.streamlit.app/)
 
 ### Deploy your own fork
 
@@ -185,19 +175,13 @@ This project is deployed on [Streamlit Community Cloud](https://streamlit.io/clo
    app.py
    ```
 
-4. (Optional) Add secrets under **Advanced settings → Secrets**:
 
-   ```toml
-   GROQ_API_KEY = "your_groq_api_key"
-   TAVILY_API_KEY = "your_tavily_api_key"
-   ```
-
-5. Click **Deploy**.
+4. Click **Deploy**.
 
 ### Using the live app
 
-1. Open [agentic-chatbot.streamlit.app](https://agentic-chatbot.streamlit.app).  
-2. In the sidebar, enter your **[Groq API key](https://console.groq.com/keys)**.  
+1. Open [pixie-the-ai.com](https://pixie-the-ai.streamlit.app/).  
+2. In the sidebar, enter your **[API key](https://console.groq.com/keys)**.  
 3. For **Chatbot With Web** or **AI News**, also add a **[Tavily API key](https://app.tavily.com/home)**.  
 4. Choose a **use case** and **model**, then chat or fetch news.
 
@@ -272,7 +256,27 @@ Do not commit `.env` — it is listed in `.gitignore`.
 
 ## 📄 License
 
-Portfolio / interview project. Add an MIT (or other) `LICENSE` file if you open-source it formally.
+MIT License
+
+Copyright (c) 2026 Pixie-the-ai
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
